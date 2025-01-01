@@ -16,8 +16,8 @@ typedef struct Playlist {
     int songsCount;
 } Playlist;
 
-#define mainMenuText "Please Choose:\n\t1. Watch playlists\n\t2. Add playlist\n\t3. Remove playlist\n\t4. exit\n"
-#define playlistMenuText "Please Choose:\n\t1. Show playlist\n\t2. Add song\n\t3. Delete Song\n\t4. Sort\n\t5. Play\n\t6. exit\n"
+#define mainMenuText "Please Choose:\n        1. Watch playlists\n        2. Add playlist\n        3. Remove playlist\n        4. exit\n"
+#define playlistMenuText "        1. Show Playlist\n        2. Add Song\n        3. Delete Song\n        4. Sort\n        5. Play\n        6. exit\n"
 #define sortPlaylistMenuText "choose:\n1. sort by year\n2. sort by streams - ascending order\n3. sort by streams - descending order\n4. sort alphabetically\n"
 #define maxNameSize 1024
 #define maxSongsSize 1048576 // 1024*1024
@@ -34,10 +34,9 @@ int menu(char* prompt) {
 void printWatchPlaylistsMenu(Playlist* playlists, int playlistsCount){
     printf("Choose a playlist:\n");
     for (int i = 0; i < playlistsCount; i++) {
-        // printf("\t%d. %s\n", i + 1, playlists[i].name);
-printf("\t%d. %s (address: %p)\n", i + 1, playlists[i].name, &playlists[i]);
+        printf("        %d. %s\n", i + 1, playlists[i].name);
     }
-    printf("\t%d. Back to main menu\n", playlistsCount + 1);
+    printf("        %d. Back to main menu\n", playlistsCount + 1);
 }
 
 
@@ -96,7 +95,7 @@ void deleteSong(Song* songs[], int *songsCount) {
 
 
 void playSong(Song* song) {
-    printf("Now playing %s:\n♪ %s ♪\n", song->title, song->lyrics);
+    printf("Now playing %s:\n%s\n", song->title, song->lyrics);
     song->streams++;
 }
 
@@ -111,12 +110,9 @@ void allocAndCopyString(char* source, char** target) {
 
 Song* allocAndInitSong(Song songs[], int songsCount) {
     songs = (Song*) realloc(songs, (songsCount + 1) * sizeof(Song));
-printf("* after realloc *\n");
-printf("songs points to %p\n", songs);
-printf("size of songs: %lu\n", sizeof(*songs));
     if (songs == NULL) exit(1);
     char tempTxt[maxNameSize];
-    printf("Enter songs's details:\n");
+    printf("Enter song's details\n");
     printf("Title:\n");
     scanf(" %[^\n]", &tempTxt);
     allocAndCopyString(tempTxt, &songs[songsCount].title);
@@ -134,24 +130,8 @@ printf("size of songs: %lu\n", sizeof(*songs));
 
 
 void addSong(Song* songs[], int *songsCount) {
-printf("*** addSong ***\n");
-printf("songs address: %p\n", &songs);
-printf("songs points to %p, which points to %p\n", songs, *songs);
-printf("songsCount: %d\n", *songsCount);
-printf("songs[*songsCount] address: %p and it points to: %p\n", &songs[*songsCount], songs[*songsCount]);
     *songs = allocAndInitSong(*songs, *songsCount);
-printf("* after allocAndInitSong *\n");
-printf("songs address: %p\n", &songs);
-printf("songs points to %p, which points to %p\n", songs, *songs);
-printf("(*songs)[*songsCount] address is %p\n", &(*songs)[*songsCount]);
-printf("addresses of songs[*songsCount]->title: %p, and the title is: %s\n", &(*songs)[*songsCount].title, (*songs)[*songsCount].title);
-printf("addresses of songs[*songsCount]->artist: %p, and the artist is: %s\n", &(*songs)[*songsCount].artist, (*songs)[*songsCount].artist);
-printf("addresses of songs[*songsCount]->year: %p, and the year is: %d\n", &(*songs)[*songsCount].year, (*songs)[*songsCount].year);
-printf("addresses of songs[*songsCount]->lyrics: %p, and the lyrics are: %s\n", &(*songs)[*songsCount].lyrics, (*songs)[*songsCount].lyrics);
-printf("addresses of songs[*songsCount]->title: %p, and the title is: %d\n", &(*songs)[*songsCount].streams, (*songs)[*songsCount].streams);
     *songsCount = *songsCount + 1;
-printf("songsCount: %d\n", *songsCount);
-    printf("*** addSong done ***\n");
 }
 
 
@@ -169,14 +149,11 @@ void showPlaylist(Song* songs[], int songsCount) {
 
 
 void playPlaylist(Song* songs[], int songsCount) {
-    for (int i = 0; i < songsCount; i++)
+    for (int i = 0; i < songsCount; i++) {
         playSong(&(*songs)[i]);
+        printf("\n");
+    }
 }
-
-
-int compareIntsAscending(int* a, int* b) {return *a - *b;}
-int compareIntsDescending(int* a, int* b) {return *b - *a;}
-int compareStrings(char* a, char* b) {return strcmp(a, b);}
 
 
 void sortPlaylist(Song* songs[], int songsCount) {
@@ -208,9 +185,6 @@ void sortPlaylist(Song* songs[], int songsCount) {
 
 
 void playlistMenu(Playlist* playlist) {
-printf("*** playlistMenu ***\n");
-printf("playlist address: %p\n", &playlist);
-printf("playlist points to %p\n", playlist);
     printf("playlist %s:\n", playlist->name);
     int choice = menu(playlistMenuText);
     while (choice != 6) {
@@ -240,19 +214,12 @@ printf("playlist points to %p\n", playlist);
 
 
 void watchPlaylists(Playlist** playlists, int playlistsCount) {
-printf("*** watchPlaylists ***\n");
-printf("playlists address: %p\n", &playlists);
-printf("playlists points to %p, which points to %p\n", playlists, *playlists);
     int choice = 0, playlistIndex = 0;
     printWatchPlaylistsMenu(*playlists, playlistsCount);
     scanf("%d", &choice);
     playlistIndex = choice - 1;
     while (playlistIndex != playlistsCount) {
         if (playlistIndex >= 0 && playlistIndex < playlistsCount) {
-printf("playlistIndex: %d\n", playlistIndex);
-printf("size of a playlist struct: %lu\n", sizeof(Playlist));
-printf("playlists[choice] address: %p\n", &playlists[playlistIndex]);
-printf("playlists[choice] points to %p, which points to %p\n", playlists[playlistIndex], &(*playlists)[playlistIndex]);
             playlistMenu(&(*playlists)[playlistIndex]);
         }
         else printf("Invalid option\n");
@@ -260,15 +227,11 @@ printf("playlists[choice] points to %p, which points to %p\n", playlists[playlis
         scanf("%d", &choice);
         playlistIndex = choice - 1;
     }
-printf("*** watchPlaylists done ***\n");
 }
 
 
 Playlist* allocAndInitPlaylistInPlaylists(Playlist playlists[], int playlistsCount) {
     playlists = (Playlist*) realloc(playlists, (playlistsCount + 1) * sizeof(Playlist));
-printf("* after realloc *\n");
-printf("playlists points to %p\n", playlists);
-printf("size of playlists: %lu\n", sizeof(*playlists));
     if (playlists == NULL) exit(1);
     playlists[playlistsCount].name = NULL;
     playlists[playlistsCount].songs = NULL;
@@ -278,24 +241,12 @@ printf("size of playlists: %lu\n", sizeof(*playlists));
 
 
 void addPlaylist(Playlist* playlists[], int *playlistsCount) {
-printf("*** addPlaylist ***\n");
-printf("playlists address: %p\n", &playlists);
-printf("playlists points to %p, which points to %p\n", playlists, *playlists);
-printf("playlistsCount: %d\n", *playlistsCount);
-printf("playlists[*playlistsCount] address: %p and it points to: %p\n", &playlists[*playlistsCount], playlists[*playlistsCount]);
     char playlistName[maxNameSize];
     printf("Enter playlist's name:\n");
     scanf("%s", playlistName);
     *playlists = allocAndInitPlaylistInPlaylists(*playlists, *playlistsCount);
-printf("* after allocAndInitPlaylistInPlaylists *\n");
-printf("playlists address: %p\n", &playlists);
-printf("playlists points to %p, which points to %p\n", playlists, *playlists);
-printf("playlists[*playlistsCount] address is %p, and it points to %p\n", &(*playlists)[*playlistsCount], playlists[*playlistsCount]);
-printf("addresses of playlists[*playlistsCount]->name: %p, playlistName: %p\n", &playlists[*playlistsCount]->name, playlistName);
     allocAndCopyString(playlistName, &(*playlists)[*playlistsCount].name);
-// printf("copied\n");
     *playlistsCount = *playlistsCount + 1;
-printf("*** addPlaylist done ***\n");
 }
 
 
@@ -343,17 +294,8 @@ void deletePlaylist(Playlist* playlists[], int *playlistsCount) {
 int main() {
     int choice = 0, playlistsCount = 0;
     Playlist* playlists = NULL;
-printf("size of a pointer: %lu\n", sizeof(Playlist*));
-printf("*** MAIN ***\n");
-printf("playlists address: %p\n", &playlists);
-printf("playlists points to: %p\n", playlists);
-printf("size of playlists: %lu\n", sizeof(*playlists));
     choice = menu(mainMenuText);
     while (choice != 4) {
-printf("*** MAIN ***\n");
-printf("playlists address: %p\n", &playlists);
-printf("playlists points to: %p\n", playlists);
-printf("size of playlists: %lu\n", sizeof(*playlists));
         switch (choice) {
             case 1:
                 watchPlaylists(&playlists, playlistsCount);
@@ -368,7 +310,6 @@ printf("size of playlists: %lu\n", sizeof(*playlists));
                 printf("Invalid option\n");
                 break;
         }
-printf("playlistsCount: %d\n", playlistsCount);
         choice = menu(mainMenuText);
     }
     printf("Goodbye!\n");
