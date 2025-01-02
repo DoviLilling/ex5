@@ -72,24 +72,47 @@ void switchSongs(Song* song1, Song* song2) {
 }
 
 
-void freeSong(Song* songs[], int* songsCount, int songIndexToFree) {
+void freeSong(Song** songs, int* songsCount, int songIndexToFree) {
+printf("~~~~~~~ freeSong start ~~~~~~~\n");
+printf("Freeing song %d\n", songIndexToFree);
+printf("Freeing title %s from %p\n", (*songs)[songIndexToFree].title, (*songs)[songIndexToFree].title);
+    free((*songs)[songIndexToFree].title);
+printf("Freeing artist %s from %p\n", (*songs)[songIndexToFree].artist, (*songs)[songIndexToFree].artist);
+    free((*songs)[songIndexToFree].artist);
+printf("Freeing lyrics %s from %p\n", (*songs)[songIndexToFree].lyrics, (*songs)[songIndexToFree].lyrics);
+    free((*songs)[songIndexToFree].lyrics);
     // sending the deleted song to the end of the list
-    for (int i = songIndexToFree - 1; i < *songsCount - 1; i++)
+printf("Pushing freed song to end of array, verifying...\n");
+printf("Current title of last song is %s\n", (*songs)[*songsCount - 1].title);
+    for (int i = songIndexToFree; i < *songsCount - 1; i++) {
+printf("Pushing...\n");
         switchSongs(&(*songs)[i], &(*songs)[i + 1]);
-    free((*songs)[*songsCount-1].title);
-    free((*songs)[*songsCount-1].artist);
-    free((*songs)[*songsCount-1].lyrics);
-    *songs = realloc(*songs, (*songsCount - 1) * sizeof(Song));
+    }
+printf("Title of last song after push is %s\n", (*songs)[*songsCount - 1].title);
+printf("Freeing song memory from songs. Reminder, songs count before delete is: %d, songs address is %p\n", *songsCount, *songs);
+    if (*songsCount == 1) {
+printf("Freeing...\n");
+        free(*songs);
+printf("Freed.\n");
+    }
+    else {
+        *songs = realloc(*songs, (*songsCount - 1) * sizeof(Song));
+printf("Songs reallocated to %p\n", *songs);
+    }
     *songsCount = *songsCount - 1;
+printf("Songs count now is: %d\n", *songsCount);
+printf("Song freed.\n");
+printf("~~~~~~~ freeSong end ~~~~~~~\n\n");
 }
 
-void deleteSong(Song* songs[], int *songsCount) {
+
+void deleteSong(Song** songs, int *songsCount) {
     int choice = -1;
     printPlaylist(*songs, *songsCount);
     printf("choose a song to delete, or 0 to quit:\n");
     scanf("%d", &choice);
     if (choice > 0 && choice <= *songsCount)
-        freeSong(songs, songsCount, choice);
+        freeSong(songs, songsCount, choice - 1);
     printf("Song deleted successfully.\n");
 }
 
@@ -100,42 +123,61 @@ void playSong(Song* song) {
 }
 
 
-void allocAndCopyString(char* source, char** target) {
-    *target = NULL;
-    *target = (char *) realloc(*target, (strlen(source) + 1 ) * sizeof(char));
-    if (*target == NULL) exit(1);
-    strcpy(*target, source);
+char* allocAndCopyString(char* source) {
+    char* target;
+    target = malloc(strlen(source) + 1);
+    if (target == NULL) exit(1);
+    strcpy(target, source);
+    return target;
 }
 
 
-Song* allocAndInitSong(Song songs[], int songsCount) {
+Song* allocAndInitSong(Song* songs, int songsCount) {
+printf("~~~~~~~ allocAndInitSong start ~~~~~~~\n");
+printf("Adding a song\n");
+printf("Current song count: %d. Current songs address: %p\n", songsCount, songs);
     songs = (Song*) realloc(songs, (songsCount + 1) * sizeof(Song));
     if (songs == NULL) exit(1);
+printf("Songs reallocated to %p\n", songs);
     char tempTxt[maxNameSize];
     printf("Enter song's details\n");
     printf("Title:\n");
     scanf(" %[^\n]", &tempTxt);
-    allocAndCopyString(tempTxt, &songs[songsCount].title);
+printf("Title before allocation. address: %p str: %s\n", songs[songsCount].title, songs[songsCount].title);
+    songs[songsCount].title = allocAndCopyString(tempTxt);
+printf("Title after allocation. address: %p str: %s\n", songs[songsCount].title, songs[songsCount].title);
     printf("Artist:\n");
     scanf(" %[^\n]", &tempTxt);
-    allocAndCopyString(tempTxt, &songs[songsCount].artist);
+printf("Artist before allocation. address: %p str: %s\n", songs[songsCount].artist, songs[songsCount].artist);
+    songs[songsCount].artist = allocAndCopyString(tempTxt);
+printf("Artist after allocation. address: %p str: %s\n", songs[songsCount].artist, songs[songsCount].artist);
     printf("Year of release:\n");
     scanf("%d", &songs[songsCount].year);
     printf("Lyrics:\n");
     scanf(" %[^\n]", &tempTxt);
-    allocAndCopyString(tempTxt, &songs[songsCount].lyrics);
+printf("Lyrics before allocation. address: %p str: %s\n", songs[songsCount].lyrics, songs[songsCount].lyrics);
+    songs[songsCount].lyrics = allocAndCopyString(tempTxt);
+printf("Lyrics after allocation. address: %p str: %s\n", songs[songsCount].lyrics, songs[songsCount].lyrics);
     songs[songsCount].streams = 0;
+printf("Song added.\n");
+printf("~~~~~~~ allocAndInitSong end ~~~~~~~\n\n");
     return songs;
 }
 
 
-void addSong(Song* songs[], int *songsCount) {
+void addSong(Song** songs, int *songsCount) {
+printf("~~~~~~~ addSong start ~~~~~~~\n");
+printf("Songs count before add: %d\n", *songsCount);
+printf("Songs address before call to allocAndInitSong: %p\n", *songs);
     *songs = allocAndInitSong(*songs, *songsCount);
+printf("Songs address after call to allocAndInitSong: %p\n", *songs);
     *songsCount = *songsCount + 1;
+printf("Songs count after add: %d\n", *songsCount);
+printf("~~~~~~~ addSong end ~~~~~~~\n\n");
 }
 
 
-void showPlaylist(Song* songs[], int songsCount) {
+void showPlaylist(Song** songs, int songsCount) {
     int choice = -1;
     printPlaylist(*songs, songsCount);
     while (1) {
@@ -148,7 +190,7 @@ void showPlaylist(Song* songs[], int songsCount) {
 }
 
 
-void playPlaylist(Song* songs[], int songsCount) {
+void playPlaylist(Song** songs, int songsCount) {
     for (int i = 0; i < songsCount; i++) {
         playSong(&(*songs)[i]);
         printf("\n");
@@ -156,7 +198,7 @@ void playPlaylist(Song* songs[], int songsCount) {
 }
 
 
-void sortPlaylist(Song* songs[], int songsCount) {
+void sortPlaylist(Song** songs, int songsCount) {
     int choice = menu(sortPlaylistMenuText);
     for (int i = 0; i < songsCount - 1; i++) {
         for (int j = 0; j < songsCount - 1 - i; j++) {
@@ -230,23 +272,35 @@ void watchPlaylists(Playlist** playlists, int playlistsCount) {
 }
 
 
-Playlist* allocAndInitPlaylistInPlaylists(Playlist playlists[], int playlistsCount) {
+Playlist* allocAndInitPlaylistInPlaylists(Playlist* playlists, int playlistsCount) {
+printf("~~~~~~~ allocAndInitPlaylistInPlaylists start ~~~~~~~\n");
+printf("Adding a playlist\n");
+printf("Current playlist count: %d. Current playlists address: %p\n", playlistsCount, playlists);
     playlists = (Playlist*) realloc(playlists, (playlistsCount + 1) * sizeof(Playlist));
     if (playlists == NULL) exit(1);
+printf("Playlists reallocated to %p\n", playlists);
     playlists[playlistsCount].name = NULL;
     playlists[playlistsCount].songs = NULL;
     playlists[playlistsCount].songsCount = 0;
+printf("~~~~~~~ allocAndInitPlaylistInPlaylists end ~~~~~~~\n\n");
     return playlists;
 }
 
 
-void addPlaylist(Playlist* playlists[], int *playlistsCount) {
+void addPlaylist(Playlist** playlists, int *playlistsCount) {
+printf("~~~~~~~ addPlaylist start ~~~~~~~\n");
     char playlistName[maxNameSize];
     printf("Enter playlist's name:\n");
     scanf("%s", playlistName);
+printf("Playlists address before call to allocAndInitPlaylistInPlaylists: %p\n", *playlists);
     *playlists = allocAndInitPlaylistInPlaylists(*playlists, *playlistsCount);
-    allocAndCopyString(playlistName, &(*playlists)[*playlistsCount].name);
+printf("Playlists address after call to allocAndInitPlaylistInPlaylists: %p\n", *playlists);
+printf("Name before allocation. address: %p str: %s\n", (*playlists)[*playlistsCount].name, (*playlists)[*playlistsCount].name);
+    (*playlists)[*playlistsCount].name = allocAndCopyString(playlistName);
+printf("Name after allocation. address: %p str: %s\n", (*playlists)[*playlistsCount].name, (*playlists)[*playlistsCount].name);
     *playlistsCount = *playlistsCount + 1;
+printf("Playlists count after add: %d\n", *playlistsCount);
+printf("~~~~~~~ addPlaylist end ~~~~~~~\n\n");
 }
 
 
@@ -269,23 +323,49 @@ void switchPlaylists(Playlist* playlist1, Playlist* playlist2) {
 }
 
 
-void deletePlaylist(Playlist* playlists[], int *playlistsCount) {
+void freePlaylist(Playlist **playlists, int *playlistsCount, int playlistIndexToFree) {
+printf("~~~~~~~ freePlaylist start ~~~~~~~\n");
+printf("Freeing playlist %d\n", playlistIndexToFree);
+printf("Freeing all songs...\n");
+    // delete all songs
+    while ((*playlists)[playlistIndexToFree].songsCount > 0) {
+        freeSong(&(*playlists)[playlistIndexToFree].songs, &(*playlists)[playlistIndexToFree].songsCount, 0);
+    }
+printf("All songs freed.\n");
+printf("Freeing name %s from %p\n", (*playlists)[playlistIndexToFree].name, (*playlists)[playlistIndexToFree].name);
+    free((*playlists)[playlistIndexToFree].name);
+    // sending the going-to-be-deleted playlist to the end of the list
+printf("Pushing freed playlist to end of array, verifying...\n");
+printf("Current name of last playlist is %s\n", (*playlists)[*playlistsCount - 1].name);
+    for (int i = playlistIndexToFree; i < *playlistsCount - 1; i++) {
+printf("Pushing...\n");
+        switchPlaylists(&(*playlists)[i], &(*playlists)[i + 1]);
+    }
+printf("Name of last playlist after push is %s\n", (*playlists)[*playlistsCount - 1].name);
+printf("Removing playlist from playlists. Reminder, playlists count before delete is: %d, playlists address is %p\n", *playlistsCount, *playlists);
+    if (*playlistsCount == 1) {
+printf("Freeing...\n");
+        free(*playlists);
+printf("Freed.\n");
+    }
+    else {
+        *playlists = realloc(*playlists, (*playlistsCount - 1) * sizeof(Playlist));
+printf("Playlists reallocated to %p\n", *playlists);
+    }
+    *playlistsCount = *playlistsCount - 1;
+printf("Playlists count now is: %d\n", *playlistsCount);
+printf("Playlist freed.\n");
+printf("~~~~~~~ freePlaylist end ~~~~~~~\n\n");
+}
+
+
+void deletePlaylist(Playlist** playlists, int *playlistsCount) {
     int choice = -1, playlistIndexToFree = -1;
     printWatchPlaylistsMenu(*playlists, *playlistsCount);
     scanf("%d", &choice);
     playlistIndexToFree = choice - 1;
     if (playlistIndexToFree >= 0 && playlistIndexToFree < *playlistsCount) {
-        // delete all songs
-        for (int i = 0; i < (*playlists)[playlistIndexToFree].songsCount; i++) {
-            freeSong(&(*playlists)[playlistIndexToFree].songs, &(*playlists)[playlistIndexToFree].songsCount, 1);
-        }
-        free((*playlists)[playlistIndexToFree].songs);
-        free((*playlists)[playlistIndexToFree].name);
-        // sending the going-to-be-deleted playlist to the end of the list
-        for (int i = playlistIndexToFree - 1; i < *playlistsCount - 1; i++)
-            switchPlaylists(&(*playlists)[i], &(*playlists)[i + 1]);
-        *playlists = realloc(*playlists, (*playlistsCount - 1) * sizeof(Playlist));
-        *playlistsCount = *playlistsCount - 1;
+        freePlaylist(playlists, playlistsCount, playlistIndexToFree);
         printf("Playlist deleted.\n");
     }
 }
@@ -312,5 +392,7 @@ int main() {
         }
         choice = menu(mainMenuText);
     }
+    for (int i = 0; i < playlistsCount; i++)
+        freePlaylist(&playlists, &playlistsCount, i);
     printf("Goodbye!\n");
 }
