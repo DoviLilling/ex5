@@ -20,7 +20,7 @@ typedef struct Playlist {
 #define playlistMenuText "        1. Show Playlist\n        2. Add Song\n        3. Delete Song\n        4. Sort\n        5. Play\n        6. exit\n"
 #define sortPlaylistMenuText "choose:\n1. sort by year\n2. sort by streams - ascending order\n3. sort by streams - descending order\n4. sort alphabetically\n"
 #define maxNameSize 1024
-#define maxSongsSize 1048576 // 1024*1024
+#define maxLyricsSize 1048576 // 1024*1024
 
 
 int menu(char* prompt) {
